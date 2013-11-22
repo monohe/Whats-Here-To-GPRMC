@@ -55,13 +55,13 @@ function formatLat(lat) {
     if(lat > 0)
         return lat.toString()+',N';
     else
-        return lat.toString()+',S';
+        return Math.abs(lat).toString()+',S';
 }
 
 //Format longitute for GPRMC sentence
 function formatLon(lon) {
     if(lon < 0)
-        return lon.toString()+',W';
+        return Math.abs(lon).toString()+',W';
     else
         return lon.toString()+',E';
 }
@@ -73,8 +73,10 @@ function decCoords2GPRMC(latlng, time, date) {
 
     lat = formatLat(lat.toFixed(4));
     lng = formatLon(lng.toFixed(4));
+    
+    var result = 'GPRMC,'+time+',A,'+lat +','+lng+',,,'+date+',,,A';
 
-    return '$GPRMC,'+time+',A,'+lat +','+lng+',,,'+date+',,,A*89';
+    return '$' + result + '*' + getChecksum(result);
 }
 
 
@@ -97,6 +99,17 @@ function  DD2DM(DegreesDec) {
         ddmmDotmm *= -1;
     }
     return ddmmDotmm;
+}
+
+// Generate XOR checksum for GPRMC string
+function getChecksum(str){
+    var checksum = 0;
+    // iterate over the string, XOR each byte with the total sum:
+    for (var i = 0; i < str.length; i++) {
+	checksum = checksum ^ str.charCodeAt(i);
+    } 
+
+    return checksum.toString(16).toUpperCase();
 }
 
 
